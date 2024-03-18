@@ -20,16 +20,12 @@ export class UserService {
       this.fakeUserDB.updateUserImage(userId, image);
     }
 
-    const savedUserImage = this.fakeUserDB.getUserImage(userId);
-
-    let buffer: Buffer = Buffer.from('')
-    if(savedUserImage) {
-      buffer = Buffer.from(savedUserImage.image);
-    }
-
     return { 
-      message: 'Upload completed.',
-      image: buffer
+      message: 'Upload completed.'
     };
+  }
+
+  public getUserImage(userId: string) {
+    return this.fakeUserDB.getUserImage(userId);
   }
 }

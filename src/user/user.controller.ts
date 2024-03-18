@@ -1,5 +1,7 @@
-import { Controller, Get, Param, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Put, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import { getContentType } from 'src/helpers/content-type.helper';
 import { UserService } from './user.service';
 
 @Controller('/user')
@@ -10,6 +12,21 @@ export class UserController {
   @Get()
   public readUsers() {
     return this.userService.getUsers();
+  }
+
+  @Get('/image/:userId')
+  public async getUserImage(@Param('userId') id: string, @Res() res: Response<Buffer>) {
+    const userImage = this.userService.getUserImage(id);
+
+    if(!userImage) {
+      throw new NotFoundException(`Image for user with ID: ${id} not found`);
+    }
+    const imageAsBuffer = Buffer.from(userImage.image);
+
+    const contentType = getContentType(imageAsBuffer) || '';
+
+    res.set('Content-Type', contentType);
+    res.send(imageAsBuffer);
   }
 
   @Put('/image/:id')
