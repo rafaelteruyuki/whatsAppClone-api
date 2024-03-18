@@ -1,25 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
-import { User } from './user.interface';
+import { FakeUserDB } from './FakeUserDB';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [
-    {
-      id: uuid(),
-      name: 'Harry Potter'
-    },
-    {
-      id: uuid(),
-      name: 'Hermione Granger'
-    },
-    {
-      id: uuid(),
-      name: 'Ron Weasley'
-    }
-  ];
+  private fakeUserDB = new FakeUserDB();
 
-  public getUsers(): User[] {
-    return [...this.users];
+  public getUsers() {
+    return [...this.fakeUserDB.users];
+  }
+
+  public addUpdateImage(userId: string, image: ArrayBuffer) {
+    const userImage = this.fakeUserDB.userImages.find(
+      image => image.userId === userId
+    );
+
+    if(!userImage) {
+      this.fakeUserDB.addUserImage(userId, image);
+    } else {
+      this.fakeUserDB.updateUserImage(userId, image);
+    }
+
+    const savedUserImage = this.fakeUserDB.getUserImage(userId);
+
+    let buffer: Buffer = Buffer.from('')
+    if(savedUserImage) {
+      buffer = Buffer.from(savedUserImage.image);
+    }
+
+    return { 
+      message: 'Upload completed.',
+      image: buffer
+    };
   }
 }
